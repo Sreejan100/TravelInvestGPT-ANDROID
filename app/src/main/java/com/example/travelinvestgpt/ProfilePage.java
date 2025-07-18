@@ -42,4 +42,11 @@ public class ProfilePage extends AppCompatActivity {
         mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(mainIntent);
     }
+
+    public void deleteaccount(View view) {
+
+        Intent deleteIntent = new Intent(this, RegsiterActivity.class);
+        deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(deleteIntent);
+    }
 }

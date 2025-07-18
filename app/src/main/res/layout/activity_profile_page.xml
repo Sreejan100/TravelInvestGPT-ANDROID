@@ -188,6 +188,7 @@
         android:layout_margin="16dp"
         android:layout_marginTop="348dp"
         android:backgroundTint="#007AFF"
+        android:onClick="deleteaccount"
         android:text="Delete your Account"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"

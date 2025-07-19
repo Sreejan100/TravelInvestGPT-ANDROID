@@ -174,6 +174,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_marginTop="348dp"
+        android:onClick="loginfunc"
         android:backgroundTint="#007AFF"
         android:text="Logout from your Account"
         android:textColor="@android:color/white"

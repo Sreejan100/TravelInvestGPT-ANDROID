@@ -1,6 +1,8 @@
 package com.example.travelinvestgpt;
 
-import okhttp3.ResponseBody;
+import com.google.gson.JsonObject;
+
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -8,10 +10,10 @@ import retrofit2.http.POST;
 public interface ApiService {
 
     @POST("android_register")
-    Call<ResponseBody> registerUser(@Body User user);
+    Call<JsonObject> registerUser(@Body JsonObject body);
 
 
     @POST("android_login")
-    Call<ResponseBody> loginUser(@Body User user);
+    Call<JsonObject> loginUser(@Body JsonObject body);
 
 }

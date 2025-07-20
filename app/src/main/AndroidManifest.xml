@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelInvestGPT">
         <activity
-            android:name=".RegsiterActivity"
+            android:name=".RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

@@ -45,7 +45,7 @@ public class ProfilePage extends AppCompatActivity {
 
     public void deleteaccount(View view) {
 
-        Intent deleteIntent = new Intent(this, RegsiterActivity.class);
+        Intent deleteIntent = new Intent(this, RegisterActivity.class);
         deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(deleteIntent);
     }

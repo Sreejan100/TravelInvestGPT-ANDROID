@@ -45,12 +45,18 @@ public class SharedPreferenceManager {
         return sharedPreferences.getString("Image",null);
     }
 
+    public void setLoggedIn(boolean bool){
+
+        editor.putBoolean("isLoggedIn",bool);
+        editor.apply();
+    }
 
 
+    public boolean getLoggedIn(){
 
+        return sharedPreferences.getBoolean("isLoggedIn", false);
 
-
-
+    }
 
 
 

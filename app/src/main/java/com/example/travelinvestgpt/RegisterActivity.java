@@ -51,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://127.0.0.1:5000/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.12:5000/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);
@@ -78,6 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String email = response.body().get("email").getAsString();
                 preferenceManager.saveUsername(username);
                 preferenceManager.saveEmail(email);
+                preferenceManager.setLoggedIn(true);
                 Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
             }
             else {

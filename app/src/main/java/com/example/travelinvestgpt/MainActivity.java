@@ -19,6 +19,8 @@ import androidx.media3.common.util.UnstableApi;
 
 public class MainActivity extends AppCompatActivity {
 
+    SharedPreferenceManager preferenceManager;
+
     @UnstableApi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,15 @@ public class MainActivity extends AppCompatActivity {
             insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);// false for light icons on dark background
         }
+
+        boolean isLoggedIn = preferenceManager.getLoggedIn();
+
+        if (!isLoggedIn){
+            Intent loginIntent = new Intent(this,LoginActivity.class);
+            loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(loginIntent);
+        }
+
     }
 
     public void profilePageTrans(View view) {

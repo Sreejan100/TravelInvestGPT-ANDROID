@@ -1,10 +1,14 @@
 package com.example.travelinvestgpt;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,8 +18,16 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import java.io.IOException;
+import java.net.URL;
+
 public class ProfilePage extends AppCompatActivity {
 
+    TextView nameedit;
+    TextView EmailEdit;
+    ImageView profileimage;
+
+    SharedPreferenceManager preferenceManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +46,28 @@ public class ProfilePage extends AppCompatActivity {
             insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);// false for light icons on dark background
         }
+
+        preferenceManager = new SharedPreferenceManager(ProfilePage.this);
+        EmailEdit = findViewById(R.id.emailtextcontainer);
+        nameedit = findViewById(R.id.nametextcontainer);
+        profileimage = findViewById(R.id.profileImage);
+
+        String name = preferenceManager.getUsername();
+        String email = preferenceManager.getEmail();
+        String imageurl = preferenceManager.getImage();
+
+        Bitmap bmp = null;
+        try {
+            bmp = BitmapFactory.decodeStream(new URL(imageurl).openConnection().getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        nameedit.setText(name);
+        EmailEdit.setText(email);
+        profileimage.setImageBitmap(bmp);
+
     }
 
     public void mainActivityTrans(View view) {

@@ -69,24 +69,23 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("email",Email);
         body.addProperty("password",pass);
 
-        ApiService apiService = RetrofitClient.getClient("http://127.0.0.1:5000/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.12:5000/").create(ApiService.class);
 
         apiService.loginUser(body).enqueue(new Callback<JsonObject>() {
 
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response){
                 if (response.isSuccessful()){
-                    try {
-                        String user2 = response.body().get("username").getAsString();
-                        String image = response.body().get("imageurl").getAsString();
-                        String Email1 = response.body().get("email").getAsString();
-                        preferenceManager.saveUsername(user2);
-                        preferenceManager.saveEmail(Email1);
-                        preferenceManager.saveImage(image);
-                        Toast.makeText(LoginActivity.this, "Welcome Back", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
+                    String user2 = response.body().get("username").getAsString();
+                    String image = response.body().get("imageurl").getAsString();
+                    String Email1 = response.body().get("email").getAsString();
+                    preferenceManager.saveUsername(user2);
+                    preferenceManager.saveEmail(Email1);
+                    preferenceManager.saveImage(image);
+                    preferenceManager.setLoggedIn(true);
+
+                    Toast.makeText(LoginActivity.this, "Welcome Back", Toast.LENGTH_SHORT).show();
                 }else {
                     Toast.makeText(LoginActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
                 }

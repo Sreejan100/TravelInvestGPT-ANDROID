@@ -27,12 +27,13 @@ public class ProfilePage extends AppCompatActivity {
     TextView EmailEdit;
     ImageView profileimage;
 
-    SharedPreferenceManager preferenceManager;
+    private SharedPreferenceManager preferenceManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_page);
+        preferenceManager = new SharedPreferenceManager(getApplicationContext());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
@@ -47,7 +48,7 @@ public class ProfilePage extends AppCompatActivity {
             insetsController.setAppearanceLightNavigationBars(true);// false for light icons on dark background
         }
 
-        preferenceManager = new SharedPreferenceManager(ProfilePage.this);
+
         EmailEdit = findViewById(R.id.emailtextcontainer);
         nameedit = findViewById(R.id.nametextcontainer);
         profileimage = findViewById(R.id.profileImage);
@@ -56,17 +57,21 @@ public class ProfilePage extends AppCompatActivity {
         String email = preferenceManager.getEmail();
         String imageurl = preferenceManager.getImage();
 
-        Bitmap bmp = null;
-        try {
-            bmp = BitmapFactory.decodeStream(new URL(imageurl).openConnection().getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
 
         nameedit.setText(name);
         EmailEdit.setText(email);
-        profileimage.setImageBitmap(bmp);
+        if (imageurl != null && !imageurl.isEmpty()) {
+            Bitmap bmp = null;
+            try {
+                bmp = BitmapFactory.decodeStream(new URL(imageurl).openConnection().getInputStream());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            profileimage.setImageBitmap(bmp);
+        }
+
+
+
 
     }
 
@@ -86,8 +91,10 @@ public class ProfilePage extends AppCompatActivity {
 
     public void loginfunc(View view) {
 
+        preferenceManager.logout();
         Intent loginIntent = new Intent(this, LoginActivity.class);
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(loginIntent);
+        finish();
     }
 }

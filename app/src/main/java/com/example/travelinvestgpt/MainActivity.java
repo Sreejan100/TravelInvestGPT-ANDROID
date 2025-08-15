@@ -19,7 +19,7 @@ import androidx.media3.common.util.UnstableApi;
 
 public class MainActivity extends AppCompatActivity {
 
-    SharedPreferenceManager preferenceManager;
+    private SharedPreferenceManager preferenceManager;
 
     @UnstableApi
     @Override
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         setContentView(R.layout.activity_main);
-
+        preferenceManager=new SharedPreferenceManager(getApplicationContext());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 

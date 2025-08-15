@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import okhttp3.ResponseBody;
@@ -51,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://192.168.1.12:5000/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);
@@ -74,15 +75,42 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
             if(response.isSuccessful()){
-                String username = response.body().get("username").getAsString();
-                String email = response.body().get("email").getAsString();
-                preferenceManager.saveUsername(username);
-                preferenceManager.saveEmail(email);
-                preferenceManager.setLoggedIn(true);
-                Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                try {
+                    String username = response.body().get("username").getAsString();
+                    String email = response.body().get("email").getAsString();
+                    preferenceManager.saveUsername(username);
+                    preferenceManager.saveEmail(email);
+                    preferenceManager.setLoggedIn(true);
+                    Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                    Intent mainintent = new Intent(RegisterActivity.this, MainActivity.class);
+                    mainintent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(mainintent);
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                    Toast.makeText(RegisterActivity.this, "Registration successful but some other error", Toast.LENGTH_SHORT).show();
+                }
             }
             else {
-                Toast.makeText(RegisterActivity.this, "Registration failed: Email already exists", Toast.LENGTH_SHORT).show();
+
+                String errorMessage = "Registration Failed";
+                if (response.errorBody() != null){
+                    try {
+
+                        String errorBodyString = response.errorBody().string();
+                        JsonObject errorJson = new Gson().fromJson(errorBodyString, JsonObject.class);
+                        if (errorJson.has("message")) {
+                            errorMessage += ": " + errorJson.get("message").getAsString();
+                        } else {
+                            errorMessage += " (Code: " + response.code() + ")";
+                        }
+                    }catch(Exception e) {
+                        errorMessage += " (Error parsing error response)";
+                    }
+                }else {
+                    errorMessage += " (Code: " + response.code() + ")";
+                }
+                Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
 
             }
         }
@@ -95,8 +123,6 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     });
-        Intent mainintent = new Intent(this, MainActivity.class);
-        mainintent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(mainintent);
+
     }
 }

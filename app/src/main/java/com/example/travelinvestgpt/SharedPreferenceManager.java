@@ -58,6 +58,12 @@ public class SharedPreferenceManager {
 
     }
 
+    public void logout() {
+        editor.clear();
+        editor.apply();
+
+    }
+
 
 
 }

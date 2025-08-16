@@ -9,11 +9,14 @@ import retrofit2.http.POST;
 
 public interface ApiService {
 
-    @POST("android_register")
+    @POST("mobile_register")
     Call<JsonObject> registerUser(@Body JsonObject body);
 
 
-    @POST("android_login")
+    @POST("mobile_login")
     Call<JsonObject> loginUser(@Body JsonObject body);
+
+    @POST("mobile_profile_delete")
+    Call<JsonObject> deleteUser(@Body JsonObject body);
 
 }

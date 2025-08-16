@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,15 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.io.IOException;
 import java.net.URL;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfilePage extends AppCompatActivity {
 
@@ -84,9 +94,52 @@ public class ProfilePage extends AppCompatActivity {
 
     public void deleteaccount(View view) {
 
-        Intent deleteIntent = new Intent(this, RegisterActivity.class);
-        deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(deleteIntent);
+        String username = preferenceManager.getUsername();
+        String email = preferenceManager.getEmail();
+
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
+
+        JsonObject body = new JsonObject();
+        body.addProperty("name",username);
+        body.addProperty("email",email);
+
+        apiService.deleteUser(body).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+               if(response.isSuccessful() && response.body() != null) {
+                   preferenceManager.logout();
+                   Intent deleteIntent = new Intent(ProfilePage.this, RegisterActivity.class);
+                   deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                   startActivity(deleteIntent);
+                   Toast.makeText(ProfilePage.this,"Account has been successfully deleted",Toast.LENGTH_SHORT).show();
+                   finish();
+               }else {
+                   String errorMessage = "Deletion Attempt Failed";
+                   if (response.errorBody() != null) {
+                       try {
+                           String errorBodyString = response.errorBody().string(); // Read once
+                           JsonObject errorJson = new Gson().fromJson(errorBodyString, JsonObject.class);
+                           if (errorJson != null && errorJson.has("message")) {
+                               errorMessage = errorJson.get("message").getAsString();
+                           } else {
+                               errorMessage += " (Code: " + response.code() + ")";
+                           }
+                       } catch (Exception e) { // Catches IOException from string() or JsonSyntaxException
+                           errorMessage += " (Error parsing error response)";
+                       }
+                   } else {
+                       errorMessage += " (Code: " + response.code() + ")";
+                   }
+                   Toast.makeText(ProfilePage.this, errorMessage, Toast.LENGTH_SHORT).show();
+               }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(ProfilePage.this, "Error: "+t.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public void loginfunc(View view) {

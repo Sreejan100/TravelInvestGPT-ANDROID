@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("email",Email);
         body.addProperty("password",pass);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5010/").create(ApiService.class);
 
         apiService.loginUser(body).enqueue(new Callback<JsonObject>() {
 

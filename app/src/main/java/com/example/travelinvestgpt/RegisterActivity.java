@@ -49,10 +49,16 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    public void loginRedirect(View view) {
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loginIntent);
+        finish();
+    }
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5010/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);

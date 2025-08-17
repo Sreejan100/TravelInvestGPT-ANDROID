@@ -19,4 +19,7 @@ public interface ApiService {
     @POST("mobile_profile_delete")
     Call<JsonObject> deleteUser(@Body JsonObject body);
 
+    @POST("mobile_profile_image_upload")
+    Call<JsonObject> profileImageChange(@Body JsonObject body);
+
 }

@@ -58,7 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5010/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);

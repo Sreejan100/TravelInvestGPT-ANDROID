@@ -162,6 +162,7 @@
         android:layout_margin="16dp"
         android:layout_marginTop="348dp"
         android:backgroundTint="#007AFF"
+        android:onClick="profileimageChange"
         android:text="Edit Profile Image"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"

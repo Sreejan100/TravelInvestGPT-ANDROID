@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +18,12 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.view.WindowCompat;
 import androidx.media3.common.util.UnstableApi;
 
+import com.bumptech.glide.Glide;
+
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferenceManager preferenceManager;
+    ImageView profileImage;
 
     @UnstableApi
     @Override
@@ -51,6 +55,17 @@ public class MainActivity extends AppCompatActivity {
             loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(loginIntent);
         }
+
+        profileImage = findViewById(R.id.profileimage);
+
+
+        String imageurl = preferenceManager.getImage();
+
+        if (imageurl != null && !imageurl.isEmpty()) {
+            Glide.with(this).load(imageurl).into(profileImage);
+        }
+
+
 
     }
 

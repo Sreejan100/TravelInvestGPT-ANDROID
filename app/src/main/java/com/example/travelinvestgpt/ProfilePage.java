@@ -187,9 +187,9 @@ public class ProfilePage extends AppCompatActivity {
             try {
                 String filepath = getPathfromUri(uri);
                 Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-                        "cloud_name","dnis1d96v",
-                                "api_key","API_KEY",
-                                "api_secret","API_SERVICE"
+                        "cloud_name","Cloud_NAME",
+                                "api_key","357414762829617",
+                                "api_secret","SUBLp355Mw_7shpzven0eVat5H8"
                 ));
 
                 Map uploadResult = cloudinary.uploader().upload(new File(filepath), ObjectUtils.emptyMap());

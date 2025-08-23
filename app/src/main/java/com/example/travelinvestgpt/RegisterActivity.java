@@ -145,7 +145,7 @@ public class RegisterActivity extends AppCompatActivity {
               @Override
               public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                   if(response.isSuccessful() && response.body() != null) {
-                      Toast.makeText(RegisterActivity.this,"Logged In Successfully",Toast.LENGTH_SHORT).show();
+                      Toast.makeText(RegisterActivity.this,"Registered In Successfully",Toast.LENGTH_SHORT).show();
                   }
                   else {
                       String errorMessage = "Invalid Credentials";

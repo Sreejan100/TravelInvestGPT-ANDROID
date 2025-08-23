@@ -2,7 +2,6 @@ package com.example.travelinvestgpt;
 
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.credentials.GetCredentialRequest;
@@ -14,7 +13,6 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
 import androidx.credentials.CredentialManager;
 import androidx.credentials.CredentialManagerCallback;
 import androidx.credentials.GetCredentialResponse;
@@ -35,11 +33,8 @@ import com.google.gson.JsonObject;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
-import org.json.JSONObject;
-
 import java.util.concurrent.Executors;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -212,15 +207,34 @@ public class LoginActivity extends AppCompatActivity {
                             preferenceManager.setSignInMethod("google");
                             preferenceManager.saveEmail(email);
                             preferenceManager.saveUsername(username);
-                            preferenceManager.saveImage(pictureUrl);
                             preferenceManager.setLoggedIn(true);
 
-                            sendToBackend(idToken);
-                            runOnUiThread(() -> {Toast.makeText(LoginActivity.this, "Welcome Back, " + username + "!", Toast.LENGTH_SHORT).show();});
-                            Intent goMainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                            goMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(goMainIntent);
+                            sendToBackend(idToken,pictureUrl, new BackendResponseCallback() {
+                                @Override
+                                public void onSuccess(String imageUrl) {
+                                    Log.d("GoogleSignIn", "Backend Image Url: "+imageUrl);
+                                    preferenceManager.saveImage(imageUrl);
 
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(LoginActivity.this, "Welcome Back, " + username + "!", Toast.LENGTH_SHORT).show();
+                                        Intent goMainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                        goMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(goMainIntent);
+                                        finish();
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(LoginActivity.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
+                                        // Optional: Handle UI rollback or sign out if backend fails critically
+                                         preferenceManager.setLoggedIn(false);
+                                    });
+                                }
+                                }
+                            );
                         }
                     }
 
@@ -245,18 +259,37 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
-    public void sendToBackend(String idToken) {
+    public void sendToBackend(String idToken, String pictureUrl, BackendResponseCallback backendResponseCallback) {
 
         JsonObject body = new JsonObject();
         body.addProperty("idToken",idToken);
 
+
         ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
-              @Override
+            @OptIn(markerClass = UnstableApi.class)
+            @Override
               public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                     if(response.isSuccessful() && response.body() != null) {
                         Log.d("GoogleSignIn","Logged In successfully");
+                        JsonObject responseBody = response.body();
+                        String responseImageUrl="";
+                        if(responseBody.has("imageurl")){
+                            if (!responseBody.get("imageurl").isJsonNull()){
+                                responseImageUrl = responseBody.get("imageurl").getAsString();
+                            }
+                            else {
+                                responseImageUrl = pictureUrl;
+                            }
+                        }
+
+                        if(backendResponseCallback != null){
+                            backendResponseCallback.onSuccess(responseImageUrl);
+                        }
+
+
+
                     }
                     else {
                         String errorMessage = "Invalid Credentials";
@@ -275,18 +308,25 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             errorMessage += " (Code: " + response.code() + ")";
                         }
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        Log.e("GoogleSignIn","Backend Call failed: "+errorMessage);
+                        if(backendResponseCallback != null){
+                            backendResponseCallback.onError(errorMessage);
+                        }
                     }
               }
 
-              @Override
+            @OptIn(markerClass = UnstableApi.class)
+            @Override
               public void onFailure(Call<JsonObject> call, Throwable t) {
-                  Toast.makeText(LoginActivity.this, "Error: "+t.getMessage(), Toast.LENGTH_SHORT).show();
-
+                  Log.e("GoogleSignIn","Backend Call failed: "+t.getMessage());
+                  if(backendResponseCallback != null){
+                      backendResponseCallback.onError("Error: "+t.getMessage());
+                  }
 
               }
           }
         );
+
 
     }
 

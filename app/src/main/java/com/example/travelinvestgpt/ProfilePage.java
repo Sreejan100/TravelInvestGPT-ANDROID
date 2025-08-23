@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import com.bumptech.glide.Glide;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.MediaManager;
-import com.google.android.gms.identitycredentials.ClearCredentialStateResponse;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
@@ -38,7 +38,11 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.credentials.CredentialManager;
 import androidx.credentials.ClearCredentialStateRequest;
 import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.ClearCredentialException;
+import androidx.credentials.exceptions.GetCredentialException;
+import androidx.credentials.exceptions.NoCredentialException;
 import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 
@@ -49,6 +53,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import com.cloudinary.utils.ObjectUtils;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -133,12 +139,6 @@ public class ProfilePage extends AppCompatActivity {
                     deleteaccountusingapple();
             }
         }
-        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
-        Intent loginIntent = new Intent(this, RegisterActivity.class);
-        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(loginIntent);
-        finish();
-
 
     }
 
@@ -148,8 +148,152 @@ public class ProfilePage extends AppCompatActivity {
     }
 
 
+    @OptIn(markerClass = UnstableApi.class)
     public void deleteaccountusinggoogle() {
-        System.out.println("Account deleted using google");
+        CredentialManager credentialManager = CredentialManager.create(this);
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder().setServerClientId(getString(R.string.server_client_id)).setFilterByAuthorizedAccounts(true).setAutoSelectEnabled(true).build();
+        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
+
+        credentialManager.getCredentialAsync(
+                ProfilePage.this,
+                request,
+                null,
+                Executors.newSingleThreadExecutor(),
+                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        handleAccountDeletion(result, new BackendResponseCallback() {
+                            @Override
+                            public void onSuccess(String message) {
+                                try {
+
+                                    CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
+                                    ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+                                    credentialManager.clearCredentialStateAsync(request,
+                                            null,
+                                            Executors.newSingleThreadExecutor(),
+                                            new CredentialManagerCallback<Void, ClearCredentialException>() {
+                                                @OptIn(markerClass = UnstableApi.class)
+                                                @Override
+                                                public void onResult(Void unused) {
+                                                    preferenceManager.logout();
+                                                    Log.d("GoogleSignIn", "Account deletion successful");
+
+                                                    runOnUiThread(() -> {
+                                                        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
+                                                        Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
+                                                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                        startActivity(loginIntent);
+                                                        finish();
+                                                    });
+                                                }
+
+                                                @OptIn(markerClass = UnstableApi.class)
+                                                @Override
+                                                public void onError(@NonNull ClearCredentialException e) {
+                                                    Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
+                                                    runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Account Deletion Unsuccessful",Toast.LENGTH_SHORT).show();});
+                                                }
+                                            }
+
+
+                                    );
+
+
+
+
+                                } catch (Exception e) {
+                                    Log.e("GoogleLogOut","Error: "+e.getMessage());
+                                }
+
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ProfilePage.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
+                                    // Optional: Handle UI rollback or sign out if backend fails critically
+                                    preferenceManager.setLoggedIn(true);
+                                });
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(@NonNull GetCredentialException e) {
+                        if (e instanceof NoCredentialException) {
+                            Log.d("GoogleAuth", "No credentials available");
+                            runOnUiThread(() -> {
+                                Toast.makeText(ProfilePage.this, "No credentials available: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        } else {
+                            Log.e("GoogleAuth", "Credential error", e);
+                            runOnUiThread(() -> {
+                                Toast.makeText(ProfilePage.this, "Credential Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    }
+                }
+        );
+
+    }
+
+    public void handleAccountDeletion(GetCredentialResponse result,BackendResponseCallback backendResponseCallback) {
+
+
+        String username = preferenceManager.getUsername();
+        String email = preferenceManager.getEmail();
+        GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.getCredential().getData());
+        String idToken = googleIdTokenCredential.getIdToken();
+        JsonObject body = new JsonObject();
+        body.addProperty("idToken",idToken);
+        body.addProperty("name",username);
+        body.addProperty("email",email);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030").create(ApiService.class);
+        apiService.deleteUser(body).enqueue(new Callback<JsonObject>() {
+            @OptIn(markerClass = UnstableApi.class)
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if(response.isSuccessful()){
+                    if(backendResponseCallback != null){
+                        backendResponseCallback.onSuccess("Account deletion successful");
+                    }
+                }
+                else {
+                    String errorMessage = "Deletion Attempt Failed";
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBodyString = response.errorBody().string(); // Read once
+                            JsonObject errorJson = new Gson().fromJson(errorBodyString, JsonObject.class);
+                            if (errorJson != null && errorJson.has("message")) {
+                                errorMessage = errorJson.get("message").getAsString();
+                            } else {
+                                errorMessage += " (Code: " + response.code() + ")";
+                            }
+                        } catch (Exception e) { // Catches IOException from string() or JsonSyntaxException
+                            errorMessage += " (Error parsing error response)";
+                        }
+                    } else {
+                        errorMessage += " (Code: " + response.code() + ")";
+                    }
+                    Log.e("GoogleSignIn","Backend Call failed: "+errorMessage);
+                    if(backendResponseCallback != null){
+                        backendResponseCallback.onError(errorMessage);
+                    }
+                }
+            }
+
+            @OptIn(markerClass = UnstableApi.class)
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e("APIForGoogle", "Failed to delete account: " + t.getMessage());
+                if(backendResponseCallback != null){
+                    backendResponseCallback.onError(t.getMessage());
+                }
+            }
+        });
+
     }
 
     public void deleteaccountusingemail() {
@@ -157,7 +301,7 @@ public class ProfilePage extends AppCompatActivity {
         String username = preferenceManager.getUsername();
         String email = preferenceManager.getEmail();
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
         JsonObject body = new JsonObject();
         body.addProperty("name",username);
@@ -172,6 +316,9 @@ public class ProfilePage extends AppCompatActivity {
                    deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                    startActivity(deleteIntent);
                    Toast.makeText(ProfilePage.this,"Account has been successfully deleted",Toast.LENGTH_SHORT).show();
+                   Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
+                   loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                   startActivity(loginIntent);
                    finish();
                }else {
                    String errorMessage = "Deletion Attempt Failed";

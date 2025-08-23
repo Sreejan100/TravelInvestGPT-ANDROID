@@ -195,6 +195,7 @@
             android:id="@+id/googlelogin"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:onClick="googleLogin"
             android:src="@drawable/google"
             android:layout_margin="8dp" />
 

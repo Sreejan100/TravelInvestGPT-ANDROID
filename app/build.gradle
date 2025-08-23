@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.travelinvestgpt"
-        minSdk 24
+        minSdk 34
         targetSdk 36
         versionCode 1
         versionName "1.0"
@@ -36,9 +36,13 @@ dependencies {
     implementation libs.constraintlayout
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation libs.media3.common
+    implementation libs.googleid
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    implementation "androidx.credentials:credentials:1.2.2"
+    implementation "androidx.credentials:credentials-play-services-auth:1.2.2"
+    implementation "com.google.android.gms:play-services-auth:21.2.0"
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'

@@ -64,6 +64,15 @@ public class SharedPreferenceManager {
 
     }
 
+    public void setSignInMethod(String signInMethod){
+        editor.putString("SignInMethod",signInMethod);
+        editor.apply();
+    }
+
+    public String getSignInMethod() {
+        return sharedPreferences.getString("SignInMethod",null);
+    }
+
 
 
 }

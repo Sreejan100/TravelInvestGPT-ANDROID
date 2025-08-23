@@ -22,4 +22,7 @@ public interface ApiService {
     @POST("mobile_profile_image_upload")
     Call<JsonObject> profileImageChange(@Body JsonObject body);
 
+    @POST("google_authentication")
+    Call<JsonObject> googleSignIn(@Body JsonObject body);
+
 }

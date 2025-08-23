@@ -154,7 +154,22 @@ public class ProfilePage extends AppCompatActivity {
 
     public void loginfunc(View view) {
 
-        preferenceManager.logout();
+
+        String SignInMethod = preferenceManager.getSignInMethod();
+        if (SignInMethod != null) {
+            switch (SignInMethod) {
+                case "google":
+                    System.out.println("google logout");
+                    break;
+                case "apple":
+                    System.out.println("apple logout");
+                    break;
+                case "email":
+                    preferenceManager.logout();
+                    break;
+            }
+
+        }
         Intent loginIntent = new Intent(this, LoginActivity.class);
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(loginIntent);
@@ -187,9 +202,9 @@ public class ProfilePage extends AppCompatActivity {
             try {
                 String filepath = getPathfromUri(uri);
                 Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-                        "cloud_name","Cloud_NAME",
-                                "api_key","API_KEY",
-                                "api_secret","API_SECRET"
+                        "cloud_name","dnis1d96v",
+                                "api_key","357414762829617",
+                                "api_secret","SUBLp355Mw_7shpzven0eVat5H8"
                 ));
 
                 Map uploadResult = cloudinary.uploader().upload(new File(filepath), ObjectUtils.emptyMap());

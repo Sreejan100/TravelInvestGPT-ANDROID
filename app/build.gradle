@@ -37,6 +37,7 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation libs.media3.common
     implementation libs.googleid
+    implementation libs.play.services.identity.credentials
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

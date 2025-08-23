@@ -213,9 +213,10 @@ public class LoginActivity extends AppCompatActivity {
                             preferenceManager.saveEmail(email);
                             preferenceManager.saveUsername(username);
                             preferenceManager.saveImage(pictureUrl);
+                            preferenceManager.setLoggedIn(true);
 
                             sendToBackend(idToken);
-
+                            runOnUiThread(() -> {Toast.makeText(LoginActivity.this, "Welcome Back, " + username + "!", Toast.LENGTH_SHORT).show();});
                             Intent goMainIntent = new Intent(LoginActivity.this, MainActivity.class);
                             goMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(goMainIntent);
@@ -255,7 +256,7 @@ public class LoginActivity extends AppCompatActivity {
               @Override
               public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                     if(response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(LoginActivity.this,"Logged In Successfully",Toast.LENGTH_SHORT).show();
+                        Log.d("GoogleSignIn","Logged In successfully");
                     }
                     else {
                         String errorMessage = "Invalid Credentials";

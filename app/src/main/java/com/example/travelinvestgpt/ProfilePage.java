@@ -1,5 +1,7 @@
 package com.example.travelinvestgpt;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -21,14 +23,27 @@ import java.util.HashMap;
 import com.bumptech.glide.Glide;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.MediaManager;
-
+import com.google.android.gms.identitycredentials.ClearCredentialStateResponse;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+
+import androidx.credentials.CredentialManager;
+import androidx.credentials.ClearCredentialStateRequest;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.exceptions.ClearCredentialException;
+import androidx.media3.common.util.Log;
+import androidx.media3.common.util.UnstableApi;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.net.URL;
@@ -102,7 +117,42 @@ public class ProfilePage extends AppCompatActivity {
         startActivity(mainIntent);
     }
 
-    public void deleteaccount(View view) {
+    public void deleteaccount(View view){
+
+        String signinmethod = preferenceManager.getSignInMethod();
+
+        if(signinmethod != null){
+            switch(signinmethod){
+                case "email":
+                    deleteaccountusingemail();
+                    break;
+                case "google":
+                    deleteaccountusinggoogle();
+                    break;
+                case "apple":
+                    deleteaccountusingapple();
+            }
+        }
+        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
+        Intent loginIntent = new Intent(this, RegisterActivity.class);
+        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loginIntent);
+        finish();
+
+
+    }
+
+    public void deleteaccountusingapple() {
+
+        System.out.println("Account deleted using apple");
+    }
+
+
+    public void deleteaccountusinggoogle() {
+        System.out.println("Account deleted using google");
+    }
+
+    public void deleteaccountusingemail() {
 
         String username = preferenceManager.getUsername();
         String email = preferenceManager.getEmail();
@@ -159,21 +209,70 @@ public class ProfilePage extends AppCompatActivity {
         if (SignInMethod != null) {
             switch (SignInMethod) {
                 case "google":
-                    System.out.println("google logout");
+                    logoutusinggoogle();
                     break;
                 case "apple":
-                    System.out.println("apple logout");
+                    logoutusingapple();
                     break;
                 case "email":
-                    preferenceManager.logout();
+                    logoutusingemail();
                     break;
             }
 
         }
+        Toast.makeText(ProfilePage.this,"Logout Successful",Toast.LENGTH_SHORT).show();
         Intent loginIntent = new Intent(this, LoginActivity.class);
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(loginIntent);
         finish();
+    }
+
+    public void logoutusingemail() {
+        preferenceManager.logout();
+
+    }
+
+    public void logoutusinggoogle() {
+
+        try {
+
+            CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
+            ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+            credentialManager.clearCredentialStateAsync(request,
+                    null,
+                    Executors.newSingleThreadExecutor(),
+                    new CredentialManagerCallback<Void, ClearCredentialException>() {
+                        @OptIn(markerClass = UnstableApi.class)
+                        @Override
+                        public void onResult(Void unused) {
+                            preferenceManager.logout();
+                            Log.d("GoogleSignIn", "SignOut successful");
+                        }
+
+                        @OptIn(markerClass = UnstableApi.class)
+                        @Override
+                        public void onError(@NonNull ClearCredentialException e) {
+                            Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
+                            runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Logout UnSuccessful",Toast.LENGTH_SHORT).show();});
+                        }
+                    }
+
+
+            );
+
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+    }
+
+    public  void logoutusingapple() {
+        System.out.println("Logged out using apple");
     }
 
     public void profileimageChange(View view) {
@@ -245,7 +344,7 @@ public class ProfilePage extends AppCompatActivity {
         String email = preferenceManager.getEmail();
         preferenceManager.saveImage(imageurl);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.9:5010/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
         JsonObject body = new JsonObject();
 
@@ -256,10 +355,9 @@ public class ProfilePage extends AppCompatActivity {
         apiService.profileImageChange(body).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    Toast.makeText(ProfilePage.this,"Image Saved Successfully",Toast.LENGTH_SHORT).show();
-                }
-                else {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(ProfilePage.this, "Image Saved Successfully", Toast.LENGTH_SHORT).show();
+                } else {
                     String errorMessage = "Image Saving Attempt Failed";
                     if (response.errorBody() != null) {
                         try {
@@ -270,7 +368,8 @@ public class ProfilePage extends AppCompatActivity {
                             } else {
                                 errorMessage += " (Code: " + response.code() + ")";
                             }
-                        } catch (Exception e) { // Catches IOException from string() or JsonSyntaxException
+                        } catch (
+                                Exception e) { // Catches IOException from string() or JsonSyntaxException
                             errorMessage += " (Error parsing error response)";
                         }
                     } else {
@@ -278,13 +377,10 @@ public class ProfilePage extends AppCompatActivity {
                     }
                     Toast.makeText(ProfilePage.this, errorMessage, Toast.LENGTH_SHORT).show();
                 }
-                }
-
-
-
+            }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                Toast.makeText(ProfilePage.this, "Error: "+t.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProfilePage.this,"Error: "+t.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
 

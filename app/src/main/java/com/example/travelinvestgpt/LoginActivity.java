@@ -1,5 +1,7 @@
 package com.example.travelinvestgpt;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 
 import androidx.annotation.OptIn;
@@ -86,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("email",Email);
         body.addProperty("password",pass);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
 
         apiService.loginUser(body).enqueue(new Callback<JsonObject>() {
 
@@ -97,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                         JsonObject responseBody = response.body();
                         // Check for key existence before accessing
                        // Log the JSON
-
+                        String token = response.body().get("token").getAsString();
                         String responseUsername="";
                         if(responseBody.has("username") && !responseBody.get("username").isJsonNull())
                         {
@@ -121,6 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                         preferenceManager.saveImage(responseImageUrl);
                         preferenceManager.setLoggedIn(true);
                         preferenceManager.setSignInMethod("email");
+                        preferenceManager.setJwtToken(token);
 
                         Toast.makeText(LoginActivity.this, "Welcome Back, " + responseUsername + "!", Toast.LENGTH_SHORT).show();
 
@@ -211,9 +214,10 @@ public class LoginActivity extends AppCompatActivity {
 
                             sendToBackend(idToken,pictureUrl, new BackendResponseCallback() {
                                 @Override
-                                public void onSuccess(String imageUrl) {
+                                public void onSuccess(String imageUrl, String token) {
                                     Log.d("GoogleSignIn", "Backend Image Url: "+imageUrl);
                                     preferenceManager.saveImage(imageUrl);
+                                    preferenceManager.setJwtToken(token);
 
                                     runOnUiThread(() -> {
                                         Toast.makeText(LoginActivity.this, "Welcome Back, " + username + "!", Toast.LENGTH_SHORT).show();
@@ -265,7 +269,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("idToken",idToken);
 
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
             @OptIn(markerClass = UnstableApi.class)
@@ -284,8 +288,10 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }
 
+                        String token = responseBody.get("token").getAsString();
+
                         if(backendResponseCallback != null){
-                            backendResponseCallback.onSuccess(responseImageUrl);
+                            backendResponseCallback.onSuccess(responseImageUrl,token);
                         }
 
 

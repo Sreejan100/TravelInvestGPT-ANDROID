@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">TravelInvestGPT</string>
-    <string name="server_client_id">126414552362-53u9uko1lj3aq55531t7tivnaphsca3b.apps.googleusercontent.com</string>
+    <string name="server_client_id">GOOGLE_CLIENT_ID</string>
 </resources>

@@ -103,10 +103,29 @@ public class RegisterActivity extends AppCompatActivity {
                             preferenceManager.saveUsername(username);
                             preferenceManager.saveImage(pictureUrl);
                             preferenceManager.setLoggedIn(true);
-                            sendToBackendRegister(idToken);
-                            Intent goMainIntent = new Intent(RegisterActivity.this, MainActivity.class);
-                            goMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(goMainIntent);
+                            sendToBackendRegister(idToken, new BackendResponseCallback() {
+                                @Override
+                                public void onSuccess(String imageUrl, String token) {
+                                    preferenceManager.setJwtToken(token);
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(RegisterActivity.this, "Regsitration Successful", Toast.LENGTH_SHORT).show();
+                                        Intent goMainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+                                        goMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(goMainIntent);
+                                        finish();
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(RegisterActivity.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
+                                        // Optional: Handle UI rollback or sign out if backend fails critically
+                                        preferenceManager.setLoggedIn(false);
+                                    });
+                                }
+                            });
 
                         }
 
@@ -134,18 +153,22 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    public void sendToBackendRegister(String idToken){
+    public void sendToBackendRegister(String idToken, BackendResponseCallback backendResponseCallback){
 
         JsonObject body = new JsonObject();
         body.addProperty("idToken",idToken);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
               @Override
               public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                   if(response.isSuccessful() && response.body() != null) {
-                      Toast.makeText(RegisterActivity.this,"Registered In Successfully",Toast.LENGTH_SHORT).show();
+                      JsonObject responseBody = response.body();
+                      String token = responseBody.get("token").getAsString();
+                      if(backendResponseCallback != null){
+                          backendResponseCallback.onSuccess("Registration successful",token);
+                      }
                   }
                   else {
                       String errorMessage = "Invalid Credentials";
@@ -164,13 +187,17 @@ public class RegisterActivity extends AppCompatActivity {
                       } else {
                           errorMessage += " (Code: " + response.code() + ")";
                       }
-                      Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                      if(backendResponseCallback != null){
+                          backendResponseCallback.onError(errorMessage);
+                      }
                   }
               }
 
               @Override
               public void onFailure(Call<JsonObject> call, Throwable t) {
-                  Toast.makeText(RegisterActivity.this, "Error: "+t.getMessage(), Toast.LENGTH_SHORT).show();
+                  if(backendResponseCallback != null){
+                      backendResponseCallback.onError(t.getMessage());
+                  }
 
 
               }
@@ -181,7 +208,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);
@@ -207,10 +234,12 @@ public class RegisterActivity extends AppCompatActivity {
                 try {
                     String username = response.body().get("username").getAsString();
                     String email = response.body().get("email").getAsString();
+                    String token = response.body().get("token").getAsString();
                     preferenceManager.saveUsername(username);
                     preferenceManager.saveEmail(email);
                     preferenceManager.setLoggedIn(true);
                     preferenceManager.setSignInMethod("email");
+                    preferenceManager.setJwtToken(token);
                     Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
                     Intent mainintent = new Intent(RegisterActivity.this, MainActivity.class);
                     mainintent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

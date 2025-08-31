@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface ApiService {
@@ -17,12 +19,13 @@ public interface ApiService {
     Call<JsonObject> loginUser(@Body JsonObject body);
 
     @POST("mobile_profile_delete")
-    Call<JsonObject> deleteUser(@Body JsonObject body);
+    Call<JsonObject> deleteUser(@Header("Authorization") String token,@Body JsonObject body);
 
     @POST("mobile_profile_image_upload")
-    Call<JsonObject> profileImageChange(@Body JsonObject body);
+    Call<JsonObject> profileImageChange(@Header("Authorization") String token,@Body JsonObject body);
 
     @POST("google_authentication")
     Call<JsonObject> googleSignIn(@Body JsonObject body);
+
 
 }

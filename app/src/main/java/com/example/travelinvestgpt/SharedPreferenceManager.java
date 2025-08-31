@@ -73,6 +73,13 @@ public class SharedPreferenceManager {
         return sharedPreferences.getString("SignInMethod",null);
     }
 
+    public void setJwtToken(String jwttoken){
+        editor.putString("JwtToken",jwttoken);
+        editor.apply();;
+    }
 
+    public String getJwttoken() {
+        return sharedPreferences.getString("JwtToken",null);
+    }
 
 }

@@ -148,116 +148,184 @@ public class ProfilePage extends AppCompatActivity {
     }
 
 
+//    @OptIn(markerClass = UnstableApi.class)
+//    public void deleteaccountusinggoogle() {
+//        CredentialManager credentialManager = CredentialManager.create(this);
+//        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder().setServerClientId(getString(R.string.server_client_id)).setFilterByAuthorizedAccounts(true).setAutoSelectEnabled(true).build();
+//        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
+//
+//        credentialManager.getCredentialAsync(
+//                ProfilePage.this,
+//                request,
+//                null,
+//                Executors.newSingleThreadExecutor(),
+//                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+//                    @Override
+//                    public void onResult(GetCredentialResponse result) {
+//                        handleAccountDeletion(result, new BackendResponseCallback() {
+//                            @Override
+//                            public void onSuccess(String message) {
+//                                try {
+//
+//                                    CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
+//                                    ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+//                                    credentialManager.clearCredentialStateAsync(request,
+//                                            null,
+//                                            Executors.newSingleThreadExecutor(),
+//                                            new CredentialManagerCallback<Void, ClearCredentialException>() {
+//                                                @OptIn(markerClass = UnstableApi.class)
+//                                                @Override
+//                                                public void onResult(Void unused) {
+//                                                    preferenceManager.logout();
+//                                                    Log.d("GoogleSignIn", "Account deletion successful");
+//
+//                                                    runOnUiThread(() -> {
+//                                                        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
+//                                                        Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
+//                                                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                                        startActivity(loginIntent);
+//                                                        finish();
+//                                                    });
+//                                                }
+//
+//                                                @OptIn(markerClass = UnstableApi.class)
+//                                                @Override
+//                                                public void onError(@NonNull ClearCredentialException e) {
+//                                                    Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
+//                                                    runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Account Deletion Unsuccessful",Toast.LENGTH_SHORT).show();});
+//                                                }
+//                                            }
+//
+//
+//                                    );
+//
+//
+//
+//
+//                                } catch (Exception e) {
+//                                    Log.e("GoogleLogOut","Error: "+e.getMessage());
+//                                }
+//
+//                            }
+//
+//                            @Override
+//                            public void onError(String errorMessage) {
+//                                Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
+//                                runOnUiThread(() -> {
+//                                    Toast.makeText(ProfilePage.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
+//                                    // Optional: Handle UI rollback or sign out if backend fails critically
+//                                    preferenceManager.setLoggedIn(true);
+//                                });
+//                            }
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull GetCredentialException e) {
+//                        if (e instanceof NoCredentialException) {
+//                            Log.d("GoogleAuth", "No credentials available");
+//                            runOnUiThread(() -> {
+//                                Toast.makeText(ProfilePage.this, "No credentials available: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            });
+//                        } else {
+//                            Log.e("GoogleAuth", "Credential error", e);
+//                            runOnUiThread(() -> {
+//                                Toast.makeText(ProfilePage.this, "Credential Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            });
+//                        }
+//                    }
+//                }
+//        );
+//
+//    }
+
     @OptIn(markerClass = UnstableApi.class)
     public void deleteaccountusinggoogle() {
-        CredentialManager credentialManager = CredentialManager.create(this);
-        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder().setServerClientId(getString(R.string.server_client_id)).setFilterByAuthorizedAccounts(true).setAutoSelectEnabled(true).build();
-        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
 
-        credentialManager.getCredentialAsync(
-                ProfilePage.this,
-                request,
-                null,
-                Executors.newSingleThreadExecutor(),
-                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
-                    @Override
-                    public void onResult(GetCredentialResponse result) {
-                        handleAccountDeletion(result, new BackendResponseCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                try {
+        handleAccountDeletion( new BackendResponseCallback() {
+            @Override
+            public void onSuccess(String message,String message2) {
+                try {
 
-                                    CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
-                                    ClearCredentialStateRequest request = new ClearCredentialStateRequest();
-                                    credentialManager.clearCredentialStateAsync(request,
-                                            null,
-                                            Executors.newSingleThreadExecutor(),
-                                            new CredentialManagerCallback<Void, ClearCredentialException>() {
-                                                @OptIn(markerClass = UnstableApi.class)
-                                                @Override
-                                                public void onResult(Void unused) {
-                                                    preferenceManager.logout();
-                                                    Log.d("GoogleSignIn", "Account deletion successful");
+                    CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
+                    ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+                    credentialManager.clearCredentialStateAsync(request,
+                            null,
+                            Executors.newSingleThreadExecutor(),
+                            new CredentialManagerCallback<Void, ClearCredentialException>() {
+                                @OptIn(markerClass = UnstableApi.class)
+                                @Override
+                                public void onResult(Void unused) {
+                                    preferenceManager.logout();
+                                    Log.d("GoogleSignIn", "Account deletion successful");
 
-                                                    runOnUiThread(() -> {
-                                                        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
-                                                        Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
-                                                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                        startActivity(loginIntent);
-                                                        finish();
-                                                    });
-                                                }
-
-                                                @OptIn(markerClass = UnstableApi.class)
-                                                @Override
-                                                public void onError(@NonNull ClearCredentialException e) {
-                                                    Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
-                                                    runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Account Deletion Unsuccessful",Toast.LENGTH_SHORT).show();});
-                                                }
-                                            }
-
-
-                                    );
-
-
-
-
-                                } catch (Exception e) {
-                                    Log.e("GoogleLogOut","Error: "+e.getMessage());
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(ProfilePage.this,"Account deletion Successful",Toast.LENGTH_SHORT).show();
+                                        Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
+                                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(loginIntent);
+                                        finish();
+                                    });
                                 }
 
+                                @OptIn(markerClass = UnstableApi.class)
+                                @Override
+                                public void onError(@NonNull ClearCredentialException e) {
+                                    Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
+                                    runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Account Deletion Unsuccessful",Toast.LENGTH_SHORT).show();});
+                                }
                             }
 
-                            @Override
-                            public void onError(String errorMessage) {
-                                Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
-                                runOnUiThread(() -> {
-                                    Toast.makeText(ProfilePage.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
-                                    // Optional: Handle UI rollback or sign out if backend fails critically
-                                    preferenceManager.setLoggedIn(true);
-                                });
-                            }
-                        });
-                    }
 
-                    @Override
-                    public void onError(@NonNull GetCredentialException e) {
-                        if (e instanceof NoCredentialException) {
-                            Log.d("GoogleAuth", "No credentials available");
-                            runOnUiThread(() -> {
-                                Toast.makeText(ProfilePage.this, "No credentials available: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        } else {
-                            Log.e("GoogleAuth", "Credential error", e);
-                            runOnUiThread(() -> {
-                                Toast.makeText(ProfilePage.this, "Credential Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    }
+                    );
+
+
+
+
+                } catch (Exception e) {
+                    Log.e("GoogleLogOut","Error: "+e.getMessage());
                 }
-        );
+
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e("GoogleSignIn", "Backend Error: " + errorMessage);
+                runOnUiThread(() -> {
+                    Toast.makeText(ProfilePage.this, "Backend login error: " + errorMessage, Toast.LENGTH_LONG).show();
+                    // Optional: Handle UI rollback or sign out if backend fails critically
+                    preferenceManager.setLoggedIn(true);
+                });
+            }
+        });
 
     }
 
-    public void handleAccountDeletion(GetCredentialResponse result,BackendResponseCallback backendResponseCallback) {
+    @OptIn(markerClass = UnstableApi.class)
+    public void handleAccountDeletion(BackendResponseCallback backendResponseCallback) {
 
 
+        String token = preferenceManager.getJwttoken();
         String username = preferenceManager.getUsername();
         String email = preferenceManager.getEmail();
-        GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.getCredential().getData());
-        String idToken = googleIdTokenCredential.getIdToken();
-        JsonObject body = new JsonObject();
-        body.addProperty("idToken",idToken);
-        body.addProperty("name",username);
-        body.addProperty("email",email);
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030").create(ApiService.class);
-        apiService.deleteUser(body).enqueue(new Callback<JsonObject>() {
+        String bearerToken = "Bearer " + token;
+        Log.d("JWT_DEBUG", "Bearer " + token);
+        if (token == null) {
+            Log.e("Auth", "No JWT token found");
+            return;
+        }
+
+            JsonObject body = new JsonObject();
+            body.addProperty("name",username);
+            body.addProperty("email",email);
+            ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5040/").create(ApiService.class);
+            apiService.deleteUser(bearerToken,body).enqueue(new Callback<JsonObject>() {
             @OptIn(markerClass = UnstableApi.class)
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 if(response.isSuccessful()){
                     if(backendResponseCallback != null){
-                        backendResponseCallback.onSuccess("Account deletion successful");
+                        backendResponseCallback.onSuccess("Account deletion successful","");
                     }
                 }
                 else {
@@ -300,14 +368,15 @@ public class ProfilePage extends AppCompatActivity {
 
         String username = preferenceManager.getUsername();
         String email = preferenceManager.getEmail();
+        String token = preferenceManager.getJwttoken();
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
 
         JsonObject body = new JsonObject();
         body.addProperty("name",username);
         body.addProperty("email",email);
 
-        apiService.deleteUser(body).enqueue(new Callback<JsonObject>() {
+        apiService.deleteUser("Bearer "+token,body).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                if(response.isSuccessful() && response.body() != null) {
@@ -316,10 +385,6 @@ public class ProfilePage extends AppCompatActivity {
                    deleteIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                    startActivity(deleteIntent);
                    Toast.makeText(ProfilePage.this,"Account has been successfully deleted",Toast.LENGTH_SHORT).show();
-                   Intent loginIntent = new Intent(ProfilePage.this, RegisterActivity.class);
-                   loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                   startActivity(loginIntent);
-                   finish();
                }else {
                    String errorMessage = "Deletion Attempt Failed";
                    if (response.errorBody() != null) {
@@ -378,6 +443,7 @@ public class ProfilePage extends AppCompatActivity {
         preferenceManager.logout();
 
     }
+
 
     public void logoutusinggoogle() {
 
@@ -490,6 +556,7 @@ public class ProfilePage extends AppCompatActivity {
         String username = preferenceManager.getUsername();
         String email = preferenceManager.getEmail();
         preferenceManager.saveImage(imageurl);
+        String token = preferenceManager.getJwttoken();
 
         ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
@@ -499,7 +566,7 @@ public class ProfilePage extends AppCompatActivity {
         body.addProperty("email",email);
         body.addProperty("imageurl",imageurl);
 
-        apiService.profileImageChange(body).enqueue(new Callback<JsonObject>() {
+        apiService.profileImageChange("Bearer " + token,body).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null) {

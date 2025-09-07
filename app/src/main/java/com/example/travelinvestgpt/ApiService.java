@@ -30,5 +30,8 @@ public interface ApiService {
     @GET("mobile_logout")
     Call<JsonObject> logoutUser(@Header("Authorization") String token);
 
+    @POST("receive_user_input")
+    Call<JsonObject> sendreceiveMessage(@Header("Authorization") String token,@Body JsonObject body);
+
 
 }

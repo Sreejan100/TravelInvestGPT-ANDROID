@@ -2,6 +2,8 @@ package com.example.travelinvestgpt;
 
 import static android.content.ContentValues.TAG;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -135,17 +137,12 @@ public class ProfilePage extends AppCompatActivity {
                 case "google":
                     deleteaccountusinggoogle();
                     break;
-                case "apple":
-                    deleteaccountusingapple();
             }
         }
 
     }
 
-    public void deleteaccountusingapple() {
 
-        System.out.println("Account deleted using apple");
-    }
 
 
 //    @OptIn(markerClass = UnstableApi.class)
@@ -423,9 +420,6 @@ public class ProfilePage extends AppCompatActivity {
                 case "google":
                     logoutusinggoogle();
                     break;
-                case "apple":
-                    logoutusingapple();
-                    break;
                 case "email":
                     logoutusingemail();
                     break;
@@ -440,7 +434,45 @@ public class ProfilePage extends AppCompatActivity {
     }
 
     public void logoutusingemail() {
-        preferenceManager.logout();
+
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+
+        String token = preferenceManager.getJwttoken();
+
+        apiService.logoutUser("Bearer "+ token).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful()) {
+                    preferenceManager.logout();
+                }
+                else {
+                    String errorMessage = "Image Saving Attempt Failed";
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBodyString = response.errorBody().string(); // Read once
+                            JsonObject errorJson = new Gson().fromJson(errorBodyString, JsonObject.class);
+                            if (errorJson != null && errorJson.has("message")) {
+                                errorMessage = errorJson.get("message").getAsString();
+                            } else {
+                                errorMessage += " (Code: " + response.code() + ")";
+                            }
+                        } catch (
+                                Exception e) { // Catches IOException from string() or JsonSyntaxException
+                            errorMessage += " (Error parsing error response)";
+                        }
+                    } else {
+                        errorMessage += " (Code: " + response.code() + ")";
+                    }
+                    Toast.makeText(ProfilePage.this, errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(ProfilePage.this,"Error: "+t.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
     }
 
@@ -449,29 +481,65 @@ public class ProfilePage extends AppCompatActivity {
 
         try {
 
-            CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
-            ClearCredentialStateRequest request = new ClearCredentialStateRequest();
-            credentialManager.clearCredentialStateAsync(request,
-                    null,
-                    Executors.newSingleThreadExecutor(),
-                    new CredentialManagerCallback<Void, ClearCredentialException>() {
-                        @OptIn(markerClass = UnstableApi.class)
-                        @Override
-                        public void onResult(Void unused) {
-                            preferenceManager.logout();
-                            Log.d("GoogleSignIn", "SignOut successful");
-                        }
+            String token = preferenceManager.getJwttoken();
+            ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
-                        @OptIn(markerClass = UnstableApi.class)
-                        @Override
-                        public void onError(@NonNull ClearCredentialException e) {
-                            Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
-                            runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Logout UnSuccessful",Toast.LENGTH_SHORT).show();});
-                        }
+            apiService.logoutUser("Bearer " + token).enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    if(response.isSuccessful()){
+                        CredentialManager credentialManager  = CredentialManager.create(ProfilePage.this);
+                        ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+                        credentialManager.clearCredentialStateAsync(request,
+                                null,
+                                Executors.newSingleThreadExecutor(),
+                                new CredentialManagerCallback<Void, ClearCredentialException>() {
+                                    @OptIn(markerClass = UnstableApi.class)
+                                    @Override
+                                    public void onResult(Void unused) {
+                                        preferenceManager.logout();
+                                        Log.d("GoogleSignIn", "SignOut successful");
+                                    }
+
+                                    @OptIn(markerClass = UnstableApi.class)
+                                    @Override
+                                    public void onError(@NonNull ClearCredentialException e) {
+                                        Log.e("GoogleSignIn", "Error: "+e.getMessage(),e);
+                                        runOnUiThread(()->{Toast.makeText(ProfilePage.this,"Logout UnSuccessful",Toast.LENGTH_SHORT).show();});
+                                    }
+                                }
+
+                        );
                     }
+                    else{
+                        String errorMessage = "Image Saving Attempt Failed";
+                        if (response.errorBody() != null) {
+                            try {
+                                String errorBodyString = response.errorBody().string(); // Read once
+                                JsonObject errorJson = new Gson().fromJson(errorBodyString, JsonObject.class);
+                                if (errorJson != null && errorJson.has("message")) {
+                                    errorMessage = errorJson.get("message").getAsString();
+                                } else {
+                                    errorMessage += " (Code: " + response.code() + ")";
+                                }
+                            } catch (
+                                    Exception e) { // Catches IOException from string() or JsonSyntaxException
+                                errorMessage += " (Error parsing error response)";
+                            }
+                        } else {
+                            errorMessage += " (Code: " + response.code() + ")";
+                        }
+                        Toast.makeText(ProfilePage.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    Toast.makeText(ProfilePage.this,"Error: "+t.getMessage(),Toast.LENGTH_SHORT).show();
+                }
+            });
 
 
-            );
 
 
 
@@ -484,9 +552,6 @@ public class ProfilePage extends AppCompatActivity {
 
     }
 
-    public  void logoutusingapple() {
-        System.out.println("Logged out using apple");
-    }
 
     public void profileimageChange(View view) {
 

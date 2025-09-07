@@ -88,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("email",Email);
         body.addProperty("password",pass);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
         apiService.loginUser(body).enqueue(new Callback<JsonObject>() {
 
@@ -269,7 +269,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("idToken",idToken);
 
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
             @OptIn(markerClass = UnstableApi.class)

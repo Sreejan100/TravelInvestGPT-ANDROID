@@ -27,5 +27,8 @@ public interface ApiService {
     @POST("google_authentication")
     Call<JsonObject> googleSignIn(@Body JsonObject body);
 
+    @GET("mobile_logout")
+    Call<JsonObject> logoutUser(@Header("Authorization") String token);
+
 
 }

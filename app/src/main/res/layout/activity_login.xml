@@ -179,36 +179,30 @@
         app:layout_constraintStart_toStartOf="parent" />
 
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="8dp"
+        android:text="Continue with Google"
+        app:icon="@drawable/google"
+        android:backgroundTint="@color/black"
+        app:iconSize="24dp"
+        android:layout_marginTop="15dp"
+        app:iconGravity="textStart"
+        app:iconTint="@null"
+        android:onClick="googleLogin"
+        android:textColor="@color/white"
+        app:iconPadding="8dp"
+        android:padding="12dp"
         app:layout_constraintTop_toBottomOf="@+id/useOtherMethods"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        >
-
-        <ImageView
-            android:id="@+id/googlelogin"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:onClick="googleLogin"
-            android:src="@drawable/google"
-            android:layout_margin="8dp" />
+        />
 
 
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/apple"
-            android:layout_margin="8dp"
-            android:id="@+id/applelogin"/>
 
 
-    </LinearLayout>
+
+
 
 
 

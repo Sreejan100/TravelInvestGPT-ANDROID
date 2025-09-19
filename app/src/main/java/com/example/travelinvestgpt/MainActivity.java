@@ -56,10 +56,19 @@ public class MainActivity extends AppCompatActivity {
         preferenceManager=new SharedPreferenceManager(getApplicationContext());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
 
-            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
-            return WindowInsetsCompat.CONSUMED;
+            // Use whichever is bigger at the bottom (keyboard or nav bar)
+            int bottomInset = Math.max(systemBars.bottom, ime.bottom);
+
+
+            v.setPadding(v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    bottomInset);
+            return insets;
         });
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         Window window = getWindow();
         window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
         WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
@@ -112,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         String token = preferenceManager.getJwttoken();
 
         body.addProperty("text",userInput);
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         apiService.sendreceiveMessage("Bearer " + token,body).enqueue(new Callback<JsonObject>() {
             @Override

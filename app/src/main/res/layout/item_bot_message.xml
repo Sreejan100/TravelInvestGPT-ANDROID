@@ -12,6 +12,6 @@
             android:id="@+id/botmessage"
             android:background="@drawable/bg_bot_message"
             android:textColor="@color/black"
-            android:textSize="16sp"/>
+            android:textSize="14sp"/>
 
 </LinearLayout>

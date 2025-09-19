@@ -57,7 +57,16 @@ public class LoginActivity extends AppCompatActivity {
         preferenceManager = new SharedPreferenceManager(getApplicationContext());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Use whichever is bigger at the bottom (keyboard or nav bar)
+            int bottomInset = Math.max(systemBars.bottom, ime.bottom);
+
+
+            v.setPadding(v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    bottomInset);
             return insets;
         });
 
@@ -88,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("email",Email);
         body.addProperty("password",pass);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         apiService.loginUser(body).enqueue(new Callback<JsonObject>() {
 
@@ -269,7 +278,7 @@ public class LoginActivity extends AppCompatActivity {
         body.addProperty("idToken",idToken);
 
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
             @OptIn(markerClass = UnstableApi.class)

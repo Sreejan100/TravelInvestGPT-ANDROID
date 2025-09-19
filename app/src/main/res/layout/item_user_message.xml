@@ -11,8 +11,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/usermessage"
         android:padding="10dp"
-        android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:textSize="14sp"
         android:background="@drawable/bg_user_message"/>
 
 </LinearLayout>

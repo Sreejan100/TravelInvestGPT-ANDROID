@@ -2,6 +2,7 @@ package com.example.travelinvestgpt;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -51,7 +52,16 @@ public class RegisterActivity extends AppCompatActivity {
         preferenceManager = new SharedPreferenceManager(getApplicationContext());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Use whichever is bigger at the bottom (keyboard or nav bar)
+            int bottomInset = Math.max(systemBars.bottom, ime.bottom);
+
+
+            v.setPadding(v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    bottomInset);
             return insets;
         });
 
@@ -158,7 +168,7 @@ public class RegisterActivity extends AppCompatActivity {
         JsonObject body = new JsonObject();
         body.addProperty("idToken",idToken);
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         apiService.googleSignIn(body).enqueue(new Callback<JsonObject>() {
               @Override
@@ -209,7 +219,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void transMain(View view){
 
-    ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+    ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
 
     username = findViewById(R.id.NameText);

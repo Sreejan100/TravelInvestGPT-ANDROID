@@ -315,7 +315,7 @@ public class ProfilePage extends AppCompatActivity {
             JsonObject body = new JsonObject();
             body.addProperty("name",username);
             body.addProperty("email",email);
-            ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5040/").create(ApiService.class);
+            ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5040/").create(ApiService.class);
             apiService.deleteUser(bearerToken,body).enqueue(new Callback<JsonObject>() {
             @OptIn(markerClass = UnstableApi.class)
             @Override
@@ -367,7 +367,7 @@ public class ProfilePage extends AppCompatActivity {
         String email = preferenceManager.getEmail();
         String token = preferenceManager.getJwttoken();
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.10:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         JsonObject body = new JsonObject();
         body.addProperty("name",username);
@@ -435,7 +435,7 @@ public class ProfilePage extends AppCompatActivity {
 
     public void logoutusingemail() {
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         String token = preferenceManager.getJwttoken();
 
@@ -482,7 +482,7 @@ public class ProfilePage extends AppCompatActivity {
         try {
 
             String token = preferenceManager.getJwttoken();
-            ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+            ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
             apiService.logoutUser("Bearer " + token).enqueue(new Callback<JsonObject>() {
                 @Override
@@ -623,7 +623,7 @@ public class ProfilePage extends AppCompatActivity {
         preferenceManager.saveImage(imageurl);
         String token = preferenceManager.getJwttoken();
 
-        ApiService apiService = RetrofitClient.getClient("http://192.168.1.2:5030/").create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient("http://192.168.1.7:5030/").create(ApiService.class);
 
         JsonObject body = new JsonObject();
 
